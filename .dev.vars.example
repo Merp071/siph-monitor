@@ -1,0 +1,6 @@
+# Template only. Set real production values in Cloudflare Workers Secrets.
+RESEND_API_KEY=
+EMAIL_FROM=
+LINE_CHANNEL_ACCESS_TOKEN=
+SOCIAL_FEED_URL=
+SOCIAL_FEED_TOKEN=

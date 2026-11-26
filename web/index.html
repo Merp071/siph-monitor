@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SiPH Pulse • Media Monitor</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="/"
+        ><span class="mark">S<span>+</span></span>
+        <div>SiPH <b>Pulse</b><small>MEDIA INTELLIGENCE</small></div></a
+      >
+      <div class="workspace">COMMUNICATIONS WORKSPACE</div>
+      <nav>
+        <button class="active" data-page="overview">
+          ◫ <span>ภาพรวมการติดตาม</span></button
+        ><button data-page="mentions">
+          ▤ <span>ข่าวและการกล่าวถึง</span><i id="navCount">0</i></button
+        ><button data-page="settings">◷ <span>ตารางเวลาและแจ้งเตือน</span></button
+        ><button data-page="history">☷ <span>ประวัติการทำงาน</span></button>
+      </nav>
+      <div class="aside-bottom">
+        <span class="avatar">CC</span>
+        <div>สื่อสารองค์กร<small>SiPH communications</small></div>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <span class="eyebrow">SiPH MEDIA MONITOR</span>
+          <h1 id="pageTitle">ภาพรวมการติดตาม</h1>
+          <p>รับฟังทุกเสียงสะท้อน เพื่อการสื่อสารที่เข้าใจมากขึ้น</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary" id="logout">ออกจากระบบ</button
+          ><span class="date" id="today"></span
+          ><button class="primary" id="scan">⟳ &nbsp;ตรวจข่าวตอนนี้</button>
+        </div>
+      </header>
+      <div id="connectionError" class="notice" hidden>
+        ยังเชื่อมต่อระบบไม่ได้ กรุณาลองอีกครั้งหรือดู Workers Logs ใน Cloudflare
+      </div>
+      <section id="overview" class="page">
+        <div class="monitor-strip">
+          <div>
+            <span class="live-dot"></span><b id="monitorState">กำลังเชื่อมต่อระบบ</b
+            ><span class="muted">Asia/Bangkok</span>
+          </div>
+          <span id="nextRun">กำลังโหลดตารางตรวจข่าว…</span>
+        </div>
+        <div class="metrics">
+          <article>
+            <div>การกล่าวถึงทั้งหมด <span>▤</span></div>
+            <strong id="total">0</strong><small>ข่าวที่บันทึกในระบบ</small>
+          </article>
+          <article>
+            <div>เชิงบวก <span class="green">↗</span></div>
+            <strong id="positive">0</strong
+            ><small><em class="green">●</em> โอกาสในการสื่อสาร</small>
+          </article>
+          <article>
+            <div>เชิงลบ <span class="red">!</span></div>
+            <strong id="negative">0</strong
+            ><small><em class="red">●</em> ประเด็นที่ควรตรวจสอบ</small>
+          </article>
+          <article>
+            <div>เป็นกลาง <span class="blue">−</span></div>
+            <strong id="neutral">0</strong
+            ><small><em class="blue">●</em> ข่าวสารและการอ้างอิง</small>
+          </article>
+        </div>
+        <div class="analytics">
+          <article class="panel sentiment-panel">
+            <div class="panel-title">
+              <h2>ทิศทางการกล่าวถึง</h2>
+              <span class="subtle">ข่าวทั้งหมด</span>
+            </div>
+            <div class="sentiment-body">
+              <div class="donut" id="donut">
+                <div>
+                  <strong id="donutTotal">0</strong><span>การกล่าวถึง</span>
+                </div>
+              </div>
+              <div class="legend" id="legend"></div>
+            </div>
+            <p class="footnote">คัดกรองจากคำสำคัญ • ทีมงานควรตรวจสอบบริบทอีกครั้ง</p>
+          </article>
+          <article class="panel schedule-panel">
+            <div class="panel-title">
+              <h2>ติดตามอย่างต่อเนื่อง</h2>
+              <span class="tag">เวลาไทย</span>
+            </div>
+            <div class="schedule-row">
+              <div class="icon-box">☼</div>
+              <div>
+                <b>ในเวลาราชการ</b><small>จันทร์–ศุกร์ · 08:30–16:30 น.</small>
+              </div>
+              <strong>ทุก 1 <small>ชั่วโมง</small></strong>
+            </div>
+            <div class="schedule-row">
+              <div class="icon-box night">☾</div>
+              <div>
+                <b>นอกเวลาราชการ</b
+                ><small>ช่วงเย็น · เสาร์–อาทิตย์ · วันหยุดที่ตั้งค่า</small>
+              </div>
+              <strong>ทุก 4 <small>ชั่วโมง</small></strong>
+            </div>
+            <div class="schedule-footer">
+              ตรวจอัตโนมัติบน Cloudflare แม้ปิดหน้าเว็บ
+            </div>
+          </article>
+        </div>
+        <div class="section-heading">
+          <div>
+            <h2>เสียงสะท้อนล่าสุด</h2>
+            <p>ข่าวและประเด็นที่ทีมสื่อสารองค์กรควรรู้</p>
+          </div>
+          <button class="text-button" data-open="mentions">ดูข่าวทั้งหมด</button>
+        </div>
+        <div id="recent"></div>
+        <div class="source-note">
+          แหล่งข้อมูล: Google News RSS และ API ที่องค์กรเชื่อมต่อ •
+          ไม่ครอบคลุมโพสต์ส่วนตัวหรือกลุ่มปิด
+        </div>
+      </section>
+      <section id="mentions" class="page" hidden>
+        <div class="toolbar">
+          <input
+            id="search"
+            type="search"
+            placeholder="ค้นหาหัวข้อข่าวหรือแหล่งที่มา…"
+            aria-label="ค้นหาข่าว"
+          /><select id="filter" aria-label="กรองทิศทาง">
+            <option value="all">ทุกทิศทาง</option>
+            <option value="negative">เชิงลบ</option>
+            <option value="positive">เชิงบวก</option>
+            <option value="neutral">เป็นกลาง</option></select
+          ><select id="statusFilter" aria-label="กรองสถานะ">
+            <option value="all">ทุกสถานะ</option>
+            <option value="new">ยังไม่ตรวจสอบ</option>
+            <option value="reviewing">กำลังติดตาม</option>
+            <option value="done">ดำเนินการแล้ว</option></select
+          ><a class="secondary" href="/api/export">ดาวน์โหลด CSV</a>
+        </div>
+        <p class="muted">แสดง 1,000 ข่าวล่าสุด · CSV ส่งออกสูงสุด 10,000 ข่าว</p>
+        <div id="allArticles"></div>
+      </section>
+      <section id="settings" class="page" hidden>
+        <form id="settingsForm">
+          <div class="settings-grid">
+            <article class="panel">
+              <h2>คำค้นที่ติดตาม</h2>
+              <p class="muted">หนึ่งคำต่อบรรทัด • ค้นหาข่าวย้อนหลัง 7 วัน</p>
+              <textarea id="keywords" rows="6" required></textarea
+              ><label for="holidays">วันหยุดเพิ่มเติม</label>
+              <p class="muted">หนึ่งวันต่อบรรทัด รูปแบบ YYYY-MM-DD เช่น 2026-12-10</p>
+              <textarea id="holidays" rows="4"></textarea
+              ><label class="check"
+                ><input type="checkbox" id="paused" /> พักการตรวจข่าวอัตโนมัติ</label
+              >
+            </article>
+            <article class="panel">
+              <h2>ช่องทางการแจ้งเตือน</h2>
+              <p class="muted">
+                นำข่าวใหม่เข้าคิว ส่งภายในรอบประมวลผลถัดไป (ประมาณ 5 นาที)
+              </p>
+              <label class="check"
+                ><input type="checkbox" id="email_enabled" /> เปิดการแจ้งเตือนอีเมล
+                <span id="emailBadge" class="tag"></span></label
+              ><label for="email_to">อีเมลผู้รับ</label
+              ><input
+                type="email"
+                id="email_to"
+                placeholder="communications@example.org"
+              /><label class="check"
+                ><input type="checkbox" id="line_enabled" /> เปิดการแจ้งเตือน LINE
+                <span id="lineBadge" class="tag"></span></label
+              ><label for="line_to">LINE User ID หรือ Group ID</label
+              ><input id="line_to" placeholder="U… หรือ C…" />
+              <div class="hint">
+                ใช้ LINE Official Account และ Messaging API ผู้รับต้องเพิ่มเพื่อนหรือเชิญ
+                OA เข้ากลุ่ม ตั้งค่ารหัสเชื่อมต่อผ่าน Cloudflare Secrets
+              </div>
+              <label>เลือกทิศทางข่าวที่ต้องการแจ้งเตือน</label>
+              <div class="checks">
+                <label
+                  ><input type="checkbox" name="sentiments" value="positive" />
+                  เชิงบวก</label
+                ><label
+                  ><input type="checkbox" name="sentiments" value="negative" />
+                  เชิงลบ</label
+                ><label
+                  ><input type="checkbox" name="sentiments" value="neutral" />
+                  เป็นกลาง</label
+                >
+              </div>
+            </article>
+          </div>
+          <div class="save-row">
+            <span>ใช้เวลาประเทศไทย (UTC+7) • วันหยุดที่ไม่ได้ระบุจะใช้ตารางวันธรรมดา</span
+            ><button class="primary" type="submit">บันทึกการตั้งค่า</button>
+          </div>
+        </form>
+        <article class="panel connection-panel">
+          <h2>การเชื่อมต่อบริการ</h2>
+          <p class="muted">
+            ผู้ดูแลตั้งค่า API keys ใน Cloudflare Workers → Settings → Variables and
+            Secrets (ชนิด Secret) ระบบไม่รับหรือบันทึก API keys ผ่าน Dashboard
+          </p>
+          <div class="hint">
+            อีเมล: RESEND_API_KEY และ EMAIL_FROM<br />LINE:
+            LINE_CHANNEL_ACCESS_TOKEN<br />Social Listening: SOCIAL_FEED_URL และ
+            SOCIAL_FEED_TOKEN<br />เชื่อมต่อบริการแล้วจึงระบุผู้รับและเปิดช่องทางด้านบน
+          </div>
+        </article>
+        <article class="panel connection-panel">
+          <h2>สถานะแหล่งข้อมูล</h2>
+          <div id="sources"></div>
+        </article>
+      </section>
+      <section id="history" class="page" hidden>
+        <article class="panel">
+          <h2>ประวัติตรวจข่าว</h2>
+          <div id="runHistory"></div>
+        </article>
+        <article class="panel connection-panel">
+          <div class="panel-title">
+            <h2>ประวัติส่งแจ้งเตือน</h2>
+            <button class="secondary" id="retry">
+              ลองส่งรายการที่ล้มเหลวอีกครั้ง
+            </button>
+          </div>
+          <p class="muted">
+            เมื่อส่งไม่สำเร็จ ระบบจะลองใหม่สูงสุด 5 ครั้ง ใช้ idempotency key ช่วยลดการส่งซ้ำ
+            (ขึ้นกับระยะเวลาที่ผู้ให้บริการเก็บ key)
+          </p>
+          <div id="deliveryHistory"></div>
+        </article>
+      </section>
+      <footer>
+        SiPH Pulse
+        <span>เครื่องมือสนับสนุนงานสื่อสารองค์กร · ไม่ใช่เว็บไซต์ทางการของโรงพยาบาล</span>
+      </footer>
+    </main>
+    <div id="toast" role="status" hidden></div>
+    <dialog id="articleDialog">
+      <div class="dialog-head">
+        <h2>ตรวจสอบประเด็น</h2>
+        <button id="closeDialog" aria-label="ปิด">×</button>
+      </div>
+      <h3 id="detailTitle"></h3>
+      <p id="detailReason"></p>
+      <a id="detailLink" target="_blank" rel="noopener noreferrer"
+        >อ่านข่าวต้นฉบับ</a
+      >
+      <form id="articleForm">
+        <label for="detailSentiment">ทิศทาง (แก้ไขโดยทีมงาน)</label
+        ><select id="detailSentiment">
+          <option value="positive">เชิงบวก</option>
+          <option value="negative">เชิงลบ</option>
+          <option value="neutral">เป็นกลาง</option></select
+        ><label for="detailStatus">สถานะการติดตาม</label
+        ><select id="detailStatus">
+          <option value="new">ยังไม่ตรวจสอบ</option>
+          <option value="reviewing">กำลังติดตาม</option>
+          <option value="done">ดำเนินการแล้ว</option></select
+        ><button class="primary" type="submit">บันทึกประเด็น</button>
+      </form>
+    </dialog>
+    <script src="/app.js"></script>
+  </body>
+</html>

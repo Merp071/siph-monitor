@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS settings(id INTEGER PRIMARY KEY CHECK(id=1),data TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS articles(id TEXT PRIMARY KEY,title TEXT NOT NULL,url TEXT NOT NULL,source TEXT,published TEXT,found TEXT,sentiment TEXT,reason TEXT,status TEXT DEFAULT 'new',run_id TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS articles_found ON articles(found DESC);
+CREATE TABLE IF NOT EXISTS runs(id INTEGER PRIMARY KEY,started TEXT,finished TEXT,added INTEGER,status TEXT,message TEXT,slot INTEGER);
+CREATE TABLE IF NOT EXISTS deliveries(id INTEGER PRIMARY KEY,article_id TEXT,channel TEXT,status TEXT DEFAULT 'pending',attempts INTEGER DEFAULT 0,next_try INTEGER,error TEXT,retry_key TEXT NOT NULL,UNIQUE(article_id,channel));
+CREATE INDEX IF NOT EXISTS deliveries_pending ON deliveries(status,next_try);
+CREATE TABLE IF NOT EXISTS locks(name TEXT PRIMARY KEY,owner TEXT NOT NULL,expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS auth(id INTEGER PRIMARY KEY CHECK(id=1),salt TEXT,password_hash TEXT,setup_hash TEXT,setup_expires INTEGER);
+CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY,expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS auth_attempts(bucket TEXT PRIMARY KEY,count INTEGER NOT NULL,expires INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS integrations(name TEXT PRIMARY KEY,ciphertext TEXT NOT NULL);
