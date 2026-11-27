@@ -1,0 +1,29 @@
+{
+  "name": "siph-monitor-cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "pretest": "npm run build",
+    "test": "node test/worker.test.mjs",
+    "check": "node scripts/check-secrets.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "test:runtime": "node test/runtime.test.mjs"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.12.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "miniflare": "4.20260730.0",
+    "prettier": "3.10.1"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "overrides": {
+    "workerd": "1.20261125.1",
+    "undici": "7.30.1",
+    "sharp": "0.35.5"
+  }
+}

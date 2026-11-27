@@ -1,0 +1,11 @@
+{
+  "repository": "Merp071/siph-monitor",
+  "base_branch": "main",
+  "account_id": "7721a5efcb1d63752f8c05da337642eb",
+  "worker_name": "siph-monitor",
+  "database_id": "dee34b57-ca99-4b48-ae2f-253da377f646",
+  "database_name": "siph-monitor-db",
+  "compatibility_date": "2026-11-26",
+  "cron": "*/5 * * * *",
+  "timezone": "Asia/Bangkok"
+}

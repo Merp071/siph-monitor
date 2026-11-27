@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SiPH Pulse · เข้าสู่ระบบ</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #102d4b;
+        font:
+          16px system-ui,
+          sans-serif;
+        color: #17354e;
+        padding: 24px;
+      }
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 430px;
+        width: 100%;
+        box-shadow: 0 25px 80px #00132955;
+      }
+      .brand {
+        color: #007d79;
+        letter-spacing: 2px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      h1 {
+        font-size: 27px;
+        margin: 20px 0 10px;
+      }
+      p {
+        font-size: 14px;
+        line-height: 1.9;
+        color: #62778b;
+      }
+      input,
+      button {
+        width: 100%;
+        padding: 13px;
+        border-radius: 6px;
+        font: inherit;
+      }
+      input {
+        border: 1px solid #cbd5df;
+        margin: 9px 0 20px;
+      }
+      button {
+        border: 0;
+        background: #007d79;
+        color: white;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+      .note {
+        font-size: 12px;
+        margin: 22px 0 0;
+      }
+      #error {
+        color: #b53c44;
+      }
+      small {
+        font-size: 12px;
+        color: #60788e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand">SiPH PULSE / MEDIA MONITOR</div>
+      <h1 id="title">เข้าสู่ระบบผู้ดูแล</h1>
+      <p id="desc">ศูนย์ติดตามข่าวและเสียงสะท้อน<br />สำหรับงานสื่อสารองค์กร</p>
+      <form id="login">
+        <label for="password">รหัสผ่านผู้ดูแล</label
+        ><input
+          type="password"
+          id="password"
+          autocomplete="current-password"
+          required
+          maxlength="256"
+        />
+        <div id="confirmWrap" hidden>
+          <label for="confirm">ยืนยันรหัสผ่าน</label
+          ><input
+            id="confirm"
+            type="password"
+            autocomplete="new-password"
+            maxlength="256"
+          />
+        </div>
+        <button id="submit">เข้าสู่ระบบ</button>
+        <p id="error" role="alert"></p>
+      </form>
+      <p class="note">
+        ข้อมูลและการตั้งค่าสำหรับผู้ได้รับสิทธิ์เท่านั้น<br />ระบบตรวจข่าวบน Cloudflare
+        แม้ปิดหน้าเว็บ
+      </p>
+    </div>
+    <script src="/login.js"></script>
+  </body>
+</html>

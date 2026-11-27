@@ -9,3 +9,5 @@ build/
 *.sqlite*
 .wrangler/
 coverage/
+src/generated-assets.mjs
+*.log
