@@ -1,5 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 export const DEFAULT = {
+  bluesky_enabled: true,
+  youtube_enabled: true,
   keywords: [
     "ศิริราช ปิยมหาราชการุณย์",
     "ศิริราชปิยมหาราชการุณย์",
@@ -139,7 +141,13 @@ export function validateSettings(old, b) {
   const cfg = { ...DEFAULT, ...old };
   if (!b || Array.isArray(b) || typeof b !== "object")
     throw Error("ข้อมูลไม่ถูกต้อง");
-  for (const k of ["email_enabled", "line_enabled", "paused"])
+  for (const k of [
+    "email_enabled",
+    "line_enabled",
+    "paused",
+    "bluesky_enabled",
+    "youtube_enabled",
+  ])
     if (k in b) {
       if (typeof b[k] !== "boolean") throw Error("ค่าการเปิดปิดไม่ถูกต้อง");
       cfg[k] = b[k];

@@ -7,6 +7,7 @@
 ## ความสามารถ
 
 - Google News RSS และ Bing News RSS สำรองเมื่อแหล่งหลักมีปัญหา ค้นหาชื่อไทย/อังกฤษและ `SiPH` ที่แก้ไขได้
+- Bluesky public search ไม่ต้องมี API key และ YouTube public-video adapter เมื่อมี `YOUTUBE_API_KEY` ขององค์กร ดู [การเริ่มต้นแบบฟรี](docs/FREE_SOURCES.md)
 - Social Listening API ผ่าน HTTPS/Bearer token รองรับข้อความโพสต์และรูปแบบข้อมูลตาม [สัญญา API](docs/SOCIAL_API.md) ไม่ครอบคลุมโพสต์ส่วนตัวหรือกลุ่มปิดโดยไม่มีสิทธิ์
 - Sentiment บวก/ลบ/กลางจากคำสำคัญภาษาไทย/อังกฤษ พร้อมจัดการคำปฏิเสธเบื้องต้นและข้อความที่มีทั้งบวก/ลบ ทีมงานแก้หมวดและสถานะการติดตามได้ ไม่ใช่โมเดล AI หรือการตรวจข้อเท็จจริง
 - ข่าวซ้ำใช้ GUID/URL เป็นตัวระบุ คิว Email (Resend) และ LINE Messaging API มี retry สูงสุด 5 ครั้ง, backoff และ idempotency key
@@ -48,6 +49,7 @@ npm run build
 | --- | --- |
 | `src/worker.mjs` | HTTP auth/API, collector, D1 outbox และ scheduled handler |
 | `src/core.mjs` | ตารางเวลา, RSS, Sentiment, validation และ CSV |
+| `src/public-social.mjs` | Bluesky/YouTube adapters และตัวกรองบริบทโรงพยาบาล |
 | `src/integrations.mjs` | อ่านเฉพาะ Secrets จาก environment binding |
 | `web/` | Dashboard และหน้าล็อกอิน |
 | `db/migrations/0001_existing_schema.sql` | baseline schema ที่ตรงกับ D1 เดิม ใช้ CREATE IF NOT EXISTS ไม่มี DROP/DELETE |

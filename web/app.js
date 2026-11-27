@@ -178,7 +178,13 @@ function render(fillSettings) {
   if (fillSettings) {
     for (const k of ["email_to", "line_to"])
       $(k).value = state.settings[k] || "";
-    for (const k of ["email_enabled", "line_enabled", "paused"])
+    for (const k of [
+      "email_enabled",
+      "line_enabled",
+      "paused",
+      "bluesky_enabled",
+      "youtube_enabled",
+    ])
       $(k).checked = !!state.settings[k];
     $("keywords").value = (state.settings.keywords || []).join("\n");
     $("holidays").value = (state.settings.holidays || []).join("\n");
@@ -204,10 +210,16 @@ function render(fillSettings) {
       "ค้นหาข่าวออนไลน์ · Bing เป็นแหล่งสำรองเมื่อ Google ไม่พร้อม",
     ],
     [
-      "Social listening API",
-      "social",
-      "Facebook / X / YouTube / อื่น ๆ ตามสิทธิ์ของผู้ให้บริการ",
+      "Bluesky (API สาธารณะ)",
+      "bluesky",
+      "ค้นโพสต์ที่มีบริบทโรงพยาบาล · สถานะนี้คือเปิดใช้งาน ดูผลตรวจจริงในประวัติ",
     ],
+    [
+      "YouTube Data API",
+      "youtube",
+      "ค้นชื่อและคำอธิบายวิดีโอ · ต้องมี YOUTUBE_API_KEY · ไม่รวมเสียงพูดหรือความคิดเห็นทั้งหมด",
+    ],
+    ["Social listening API", "social", "แหล่งอื่นตามสิทธิ์ของผู้ให้บริการที่องค์กรเชื่อมต่อ"],
   ]
     .map(
       ([s, k, h]) =>
@@ -306,7 +318,13 @@ $("settingsForm").onsubmit = async (e) => {
   e.preventDefault();
   const cfg = {};
   for (const k of ["email_to", "line_to"]) cfg[k] = $(k).value;
-  for (const k of ["email_enabled", "line_enabled", "paused"])
+  for (const k of [
+    "email_enabled",
+    "line_enabled",
+    "paused",
+    "bluesky_enabled",
+    "youtube_enabled",
+  ])
     cfg[k] = $(k).checked;
   for (const k of ["keywords", "holidays"])
     cfg[k] = $(k)

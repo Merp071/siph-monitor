@@ -27,6 +27,7 @@ node scripts/init-db.mjs --confirm=siph-monitor-db
 | `LINE_CHANNEL_ACCESS_TOKEN` | ส่ง push ด้วย LINE Official Account / Messaging API |
 | `SOCIAL_FEED_URL` | HTTPS endpoint ของ social listening ที่องค์กรมีสิทธิ์ใช้ |
 | `SOCIAL_FEED_TOKEN` | Bearer token สำหรับ endpoint นั้น |
+| `YOUTUBE_API_KEY` | YouTube public-video search ภายในโควตาบัญชี ดู FREE_SOURCES.md |
 
 ไม่จำเป็นต้องตั้งทุกช่อง แหล่งข่าว RSS ใช้งานได้โดยไม่ต้องมี API key สถานะ Dashboard แสดงเฉพาะว่ามีการตั้งค่า ไม่ส่งค่า secret กลับ API
 
@@ -83,3 +84,7 @@ node scripts/setup-admin.mjs --create-one-use-link
 ## Rollback
 
 เก็บเวอร์ชัน Worker เดิมและสำรอง D1 ก่อนปล่อย ใช้ Workers Versions dashboard ย้อนกลับ code version ได้ โดยไม่ลบฐานข้อมูลหรือ Secrets การ rollback code ไม่ย้อนคืนข้อมูลใน D1 อ่านคู่มือ Time Travel/Export ของแพ็กเกจให้ตรงกับเหตุการณ์ก่อนกู้ข้อมูลจริง
+
+## แหล่งฟรีที่เพิ่ม
+
+Bluesky เปิดใช้ได้โดยไม่ต้องซื้อบริการหรือมี key; YouTube ต้องมี key ขององค์กรก่อนจึงเรียก ทั้งสองปิด/เปิดใน Dashboard ได้โดยไม่เปลี่ยน schema ข้อมูลเดิม ดู [คู่มือแหล่งฟรี](FREE_SOURCES.md) สำหรับข้อจำกัด โควตา และการเก็บ metadata ของ YouTube

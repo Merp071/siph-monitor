@@ -27,7 +27,13 @@ function env() {
       "utf8",
     ),
   );
-  db.prepare("INSERT INTO settings VALUES(1,?)").run(JSON.stringify(DEFAULT));
+  db.prepare("INSERT INTO settings VALUES(1,?)").run(
+    JSON.stringify({
+      ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
+    }),
+  );
   db.prepare("INSERT INTO auth VALUES(1,NULL,NULL,NULL,NULL)").run();
   const prepare = (query) => ({
     query,
@@ -198,11 +204,15 @@ test("setup link single use, session cookie and password login", async () => {
 });
 test("scan deduplicates news and creates one outbox per enabled channel", async (t) => {
   const e = env();
-  e.db
-    .prepare("UPDATE settings SET data=?")
-    .run(
-      JSON.stringify({ ...DEFAULT, email_enabled: true, line_enabled: true }),
-    );
+  e.db.prepare("UPDATE settings SET data=?").run(
+    JSON.stringify({
+      ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
+      email_enabled: true,
+      line_enabled: true,
+    }),
+  );
   t.mock.method(
     globalThis,
     "fetch",
@@ -227,16 +237,26 @@ test("scheduled scan skips persisted current slot and pause state", async (t) =>
   await scan(e, { scheduled: true });
   assert.equal((await scan(e, { scheduled: true })).skipped, true);
   assert.equal(mock.mock.callCount(), 1);
-  e.db
-    .prepare("UPDATE settings SET data=?")
-    .run(JSON.stringify({ ...DEFAULT, paused: true }));
+  e.db.prepare("UPDATE settings SET data=?").run(
+    JSON.stringify({
+      ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
+      paused: true,
+    }),
+  );
   assert.equal((await scan(e, { scheduled: true })).paused, true);
 });
 test("outbox retries five times then stops", async () => {
   const e = env();
-  e.db
-    .prepare("UPDATE settings SET data=?")
-    .run(JSON.stringify({ ...DEFAULT, email_enabled: true }));
+  e.db.prepare("UPDATE settings SET data=?").run(
+    JSON.stringify({
+      ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
+      email_enabled: true,
+    }),
+  );
   e.db
     .prepare(
       "INSERT INTO articles(id,title,url,sentiment,run_id) VALUES('a','test','https://example.org','neutral','test')",
@@ -260,6 +280,8 @@ test("LINE delivery idempotency conflict is treated as already accepted", async 
   e.db.prepare("UPDATE settings SET data=?").run(
     JSON.stringify({
       ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
       line_enabled: true,
       line_to: "U" + "1".repeat(32),
     }),
@@ -374,6 +396,8 @@ test("disabled email backlog cannot starve enabled LINE deliveries", async (t) =
   e.db.prepare("UPDATE settings SET data=?").run(
     JSON.stringify({
       ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
       line_enabled: true,
       line_to: "U" + "1".repeat(32),
     }),
@@ -419,6 +443,8 @@ test("LINE conflict without accepted request header remains retryable", async (t
   e.db.prepare("UPDATE settings SET data=?").run(
     JSON.stringify({
       ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
       line_enabled: true,
       line_to: "U" + "1".repeat(32),
     }),
@@ -451,6 +477,8 @@ test("email uses stable idempotency key and secret-bound sender", async (t) => {
   e.db.prepare("UPDATE settings SET data=?").run(
     JSON.stringify({
       ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
       email_enabled: true,
       email_to: "recipient@example.org",
     }),
@@ -577,4 +605,79 @@ test("baseline schema adoption preserves existing articles and authentication", 
     e.db.prepare("SELECT password_hash FROM auth").get().password_hash,
     "existing-hash",
   );
+});
+test("public Bluesky defaults apply to old settings without a schema migration", async (t) => {
+  const e = env();
+  const old = { ...DEFAULT };
+  delete old.bluesky_enabled;
+  delete old.youtube_enabled;
+  e.db.prepare("UPDATE settings SET data=?").run(JSON.stringify(old));
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url) =>
+      new Response(
+        url.startsWith("https://api.bsky.app/")
+          ? JSON.stringify({
+              posts: [
+                {
+                  uri: "at://did:plc:example/app.bsky.feed.post/abc123",
+                  record: {
+                    text: "ขอบคุณ SiPH คุณหมอดูแลดี",
+                    createdAt: new Date().toISOString(),
+                  },
+                },
+              ],
+            })
+          : "<rss><channel/></rss>",
+      ),
+  );
+  assert.equal((await scan(e)).added, 1);
+  assert.equal(
+    e.db.prepare("SELECT source FROM articles").get().source,
+    "Bluesky",
+  );
+});
+test("YouTube metadata expires without removing other sources or authentication", async () => {
+  const { expireYouTube } = await import("../src/worker.mjs");
+  const e = env();
+  const s = e.db.prepare(
+    "INSERT INTO articles(id,title,url,source,found,sentiment,run_id) VALUES(?,?,?,?,?,?,?)",
+  );
+  s.run(
+    "old-y",
+    "video",
+    "https://example.org/old",
+    "YouTube",
+    "2020-01-01",
+    "neutral",
+    "test",
+  );
+  s.run(
+    "news",
+    "news",
+    "https://example.org/news",
+    "Google News",
+    "2020-01-01",
+    "neutral",
+    "test",
+  );
+  s.run(
+    "new-y",
+    "video",
+    "https://example.org/new",
+    "YouTube",
+    new Date().toISOString(),
+    "neutral",
+    "test",
+  );
+  e.db
+    .prepare(
+      "INSERT INTO deliveries(article_id,channel,next_try,retry_key) VALUES('old-y','email',0,'old')",
+    )
+    .run();
+  await expireYouTube(e);
+  assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM articles").get().n, 2);
+  assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM deliveries").get().n, 0);
+  assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM auth").get().n, 1);
 });

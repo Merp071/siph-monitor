@@ -16,6 +16,18 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       EMAIL_FROM: "sender@example.org",
     },
     outboundService: async (req) => {
+      if (req.url.startsWith("https://api.bsky.app/"))
+        return Response.json({
+          posts: [
+            {
+              uri: "at://did:plc:runtime/app.bsky.feed.post/abc123",
+              record: {
+                text: "ขอบคุณ SiPH คุณหมอดูแลดี",
+                createdAt: new Date().toISOString(),
+              },
+            },
+          ],
+        });
       if (req.url.startsWith("https://api.resend.com/")) {
         deliveries.push(await req.json());
         return Response.json({ id: "accepted" });
@@ -41,6 +53,8 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       .bind(
         JSON.stringify({
           ...DEFAULT,
+          bluesky_enabled: true,
+          youtube_enabled: false,
           email_enabled: true,
           email_to: "recipient@example.org",
         }),
@@ -75,12 +89,12 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       body: "{}",
     });
     assert.equal(r.status, 200);
-    assert.equal((await r.json()).added, 1);
+    assert.equal((await r.json()).added, 2);
     r = await mf.dispatchFetch("https://monitor.test/api/state", {
       headers: { Cookie: cookie },
     });
     const state = await r.json();
-    assert.equal(state.stats.total, 1);
+    assert.equal(state.stats.total, 2);
     assert.equal(state.connections.email, true);
     assert.doesNotMatch(JSON.stringify(state), /test-only-runtime-secret/);
     const worker = await mf.getWorker();
@@ -93,7 +107,7 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       (await db.prepare("SELECT status FROM deliveries").first()).status,
       "sent",
     );
-    assert.equal(deliveries.length, 1);
+    assert.equal(deliveries.length, 2);
     assert.deepEqual(deliveries[0].to, ["recipient@example.org"]);
   } finally {
     await mf.dispose();

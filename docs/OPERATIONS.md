@@ -12,3 +12,7 @@
 - ติดตาม Workers/D1/API usage และค่าใช้บริการจากแต่ละผู้ให้บริการ ไม่มีการเปลี่ยน plan หรือสมัครบริการส่งข้อความในงานพัฒนา
 - อย่า log Secrets, headers Authorization, response bodies ของ social provider หรือ one-use setup link ลง GitHub/issue/logs ห้ามเปิด production auth bypass เพื่อทดสอบ ใช้ฐานทดสอบและ credentials จำลอง
 - หลัง merge ให้ smoke-test เวอร์ชันที่ Deploy จริง (login, RSS, provider API และผู้รับที่อนุญาต) ก่อนเปิดช่องทางจริง ชุดทดสอบในเครื่องไม่แทนการตรวจบัญชีและโควตาจริง
+
+- Bluesky/YouTube ใหม่ใช้บริบทโรงพยาบาลเมื่อคำค้นเป็น SiPH เพื่อลดข่าว silicon photonics; ค้นย้อนหลัง 7 วัน หนึ่งหน้าต่อรอบ (Bluesky 100, YouTube 50) จึงไม่รับประกันครบทุกโพสต์
+- Source toggles เป็น preferences ไม่ใช่ secret; YouTube ไม่ส่ง request หากยังไม่มี YOUTUBE_API_KEY
+- ข้อยกเว้น retention: metadata แหล่ง YouTube และคิวของรายการนั้นจะถูกลบหลัง 29 วันด้วย Cron; ข่าวจากแหล่งอื่นยังใช้นโยบายเดิม
