@@ -1,3 +1,4 @@
+import { collectPublicSocial } from "./public-social.mjs";
 import { credentials, sourceURL } from "./integrations.mjs";
 import {
   DEFAULT,
@@ -275,6 +276,21 @@ async function collect(config, keys) {
       errors.push("Social API: " + e.message);
     }
   }
+  const publicResult = await collectPublicSocial(
+    config,
+    keys,
+    async (url, headers) => {
+      const raw = await getURL(url, headers);
+      try {
+        return JSON.parse(raw);
+      } catch {
+        throw Error("API ส่ง JSON ที่อ่านไม่ได้");
+      }
+    },
+  );
+  records.push(...publicResult.records);
+  errors.push(...publicResult.errors);
+  success += publicResult.success;
   return { records, errors, success };
 }
 async function scan(env, { scheduled = false } = {}) {
@@ -362,7 +378,7 @@ async function scan(env, { scheduled = false } = {}) {
         added,
         status,
         result.errors.join(" | ") ||
-          "Google News / Bing fallback / configured social API",
+          "Google News / Bing / public social / configured provider API",
         slot,
       )
       .run();
@@ -480,6 +496,17 @@ async function deliver(env) {
     await release(env, "delivery", lock);
   }
 }
+async function expireYouTube(env, now = Date.now()) {
+  const cutoff = new Date(now - 29 * 86400000).toISOString();
+  await env.DB.batch([
+    env.DB.prepare(
+      "DELETE FROM deliveries WHERE article_id IN (SELECT id FROM articles WHERE source='YouTube' AND found<?)",
+    ).bind(cutoff),
+    env.DB.prepare(
+      "DELETE FROM articles WHERE source='YouTube' AND found<?",
+    ).bind(cutoff),
+  ]);
+}
 async function state(env) {
   const config = await cfg(env),
     keys = credentials(env),
@@ -503,6 +530,8 @@ async function state(env) {
     connections: {
       news: true,
       social: !!keys.social_feed_url,
+      bluesky: config.bluesky_enabled,
+      youtube: config.youtube_enabled && !!keys.youtube_api_key,
       email: !!keys.email_api_key && !!keys.email_from,
       line: !!keys.line_token,
     },
@@ -697,6 +726,7 @@ export default {
     ctx.waitUntil(
       (async () => {
         const result = await scan(env, { scheduled: true });
+        await expireYouTube(env);
         await deliver(env);
         await env.DB.batch([
           env.DB.prepare("DELETE FROM sessions WHERE expires<?").bind(
@@ -711,4 +741,12 @@ export default {
     );
   },
 };
-export { passwordHash, safeEqual, scan, deliver, collect, credentials };
+export {
+  passwordHash,
+  safeEqual,
+  scan,
+  deliver,
+  collect,
+  credentials,
+  expireYouTube,
+};
