@@ -1,5 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 export const DEFAULT = {
+  google_alerts_enabled: true,
+  excluded_urls: [],
   bluesky_enabled: true,
   youtube_enabled: true,
   keywords: [
@@ -145,6 +147,7 @@ export function validateSettings(old, b) {
     "email_enabled",
     "line_enabled",
     "paused",
+    "google_alerts_enabled",
     "bluesky_enabled",
     "youtube_enabled",
   ])
@@ -173,6 +176,28 @@ export function validateSettings(old, b) {
     )
       throw Error("ระบุคำค้น 1–20 คำ");
     cfg.keywords = b.keywords.map((k) => k.trim());
+  }
+  if ("excluded_urls" in b) {
+    if (!Array.isArray(b.excluded_urls) || b.excluded_urls.length > 50)
+      throw Error("ระบุ URL ที่ตัดออกได้ไม่เกิน 50 รายการ");
+    cfg.excluded_urls = [
+      ...new Set(
+        b.excluded_urls.map((value) => {
+          if (typeof value !== "string" || value.length > 2048)
+            throw Error("URL ที่ตัดออกไม่ถูกต้อง");
+          let u;
+          try {
+            u = new URL(value.trim());
+          } catch {
+            throw Error("URL ที่ตัดออกไม่ถูกต้อง");
+          }
+          if (u.protocol !== "https:" || u.username || u.password || u.port)
+            throw Error("ใช้ URL HTTPS ของบัญชีหรือเว็บไซต์ที่ต้องการตัดออก");
+          u.hash = "";
+          return u.href;
+        }),
+      ),
+    ];
   }
   if ("holidays" in b) {
     if (

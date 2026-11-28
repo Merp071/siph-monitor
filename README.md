@@ -7,6 +7,7 @@
 ## ความสามารถ
 
 - Google News RSS และ Bing News RSS สำรองเมื่อแหล่งหลักมีปัญหา ค้นหาชื่อไทย/อังกฤษและ `SiPH` ที่แก้ไขได้
+- Google Alerts RSS/Atom สำหรับผลค้นหาโพสต์สาธารณะที่ Google ทำดัชนี พร้อมคำค้น Facebook, Instagram, TikTok, X และ Pantip และ URL ที่ต้องการตัดออก ต้องสร้าง Alert และตั้ง Secret ก่อน ดู [คู่มือ Google Alerts](docs/GOOGLE_ALERTS.md)
 - Bluesky public search ไม่ต้องมี API key และ YouTube public-video adapter เมื่อมี `YOUTUBE_API_KEY` ขององค์กร ดู [การเริ่มต้นแบบฟรี](docs/FREE_SOURCES.md)
 - Social Listening API ผ่าน HTTPS/Bearer token รองรับข้อความโพสต์และรูปแบบข้อมูลตาม [สัญญา API](docs/SOCIAL_API.md) ไม่ครอบคลุมโพสต์ส่วนตัวหรือกลุ่มปิดโดยไม่มีสิทธิ์
 - Sentiment บวก/ลบ/กลางจากคำสำคัญภาษาไทย/อังกฤษ พร้อมจัดการคำปฏิเสธเบื้องต้นและข้อความที่มีทั้งบวก/ลบ ทีมงานแก้หมวดและสถานะการติดตามได้ ไม่ใช่โมเดล AI หรือการตรวจข้อเท็จจริง
@@ -49,6 +50,7 @@ npm run build
 | --- | --- |
 | `src/worker.mjs` | HTTP auth/API, collector, D1 outbox และ scheduled handler |
 | `src/core.mjs` | ตารางเวลา, RSS, Sentiment, validation และ CSV |
+| `src/google-alerts.mjs` | อ่าน feed ผลค้นหา Google Alerts, canonical URL, กรองบัญชีและป้องกัน feed URL รั่ว |
 | `src/public-social.mjs` | Bluesky/YouTube adapters และตัวกรองบริบทโรงพยาบาล |
 | `src/integrations.mjs` | อ่านเฉพาะ Secrets จาก environment binding |
 | `web/` | Dashboard และหน้าล็อกอิน |

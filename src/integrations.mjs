@@ -1,6 +1,7 @@
 /** Provider credentials are bound exclusively through Cloudflare Workers Secrets. */
 export function credentials(env) {
   return {
+    google_alerts_feeds: env.GOOGLE_ALERTS_FEEDS || "",
     youtube_api_key: env.YOUTUBE_API_KEY || "",
     email_api_key: env.RESEND_API_KEY || "",
     email_from: env.EMAIL_FROM || "",

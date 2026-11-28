@@ -22,11 +22,12 @@ for (const file of files) {
     /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(data) ||
     /\bgh[pousr]_[A-Za-z0-9]{30,}\b/.test(data) ||
     /\bre_[A-Za-z0-9]{24,}\b/.test(data) ||
-    /\bAIza[A-Za-z0-9_-]{35}\b/.test(data)
+    /\bAIza[A-Za-z0-9_-]{35}\b/.test(data) ||
+    /google\.com\/alerts\/feeds\/[0-9]{6,}\/[0-9]{6,}/.test(data)
   )
     bad.push(file + ": possible private key or API token");
   if (
-    /(?:YOUTUBE_API_KEY|RESEND_API_KEY|LINE_CHANNEL_ACCESS_TOKEN|SOCIAL_FEED_TOKEN|CLOUDFLARE_API_TOKEN)\s*[:=]\s*["'](?!test-|fixture-|<|["'])[^"'\n]{16,}["']/.test(
+    /(?:GOOGLE_ALERTS_FEEDS|YOUTUBE_API_KEY|RESEND_API_KEY|LINE_CHANNEL_ACCESS_TOKEN|SOCIAL_FEED_TOKEN|CLOUDFLARE_API_TOKEN)\s*[:=]\s*["'](?!test-|fixture-|<|["'])[^"'\n]{16,}["']/.test(
       data,
     )
   )

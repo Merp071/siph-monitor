@@ -182,12 +182,14 @@ function render(fillSettings) {
       "email_enabled",
       "line_enabled",
       "paused",
+      "google_alerts_enabled",
       "bluesky_enabled",
       "youtube_enabled",
     ])
       $(k).checked = !!state.settings[k];
     $("keywords").value = (state.settings.keywords || []).join("\n");
     $("holidays").value = (state.settings.holidays || []).join("\n");
+    $("excluded_urls").value = (state.settings.excluded_urls || []).join("\n");
     document
       .querySelectorAll("[name=sentiments]")
       .forEach(
@@ -203,7 +205,31 @@ function render(fillSettings) {
   $("lineBadge").textContent = state.connections.line
     ? "มี token แล้ว"
     : "ยังไม่ตั้งค่า token";
+  const setup = state.google_alerts_setup || { status: "missing", count: 0 };
+  $("alertsSetup").textContent =
+    setup.status === "ready"
+      ? "ตั้งค่า feed แล้ว " + setup.count + " รายการ — ดูผลตรวจจริงในประวัติ"
+      : setup.status === "invalid"
+        ? "รูปแบบ GOOGLE_ALERTS_FEEDS ไม่ถูกต้อง กรุณาตรวจ Cloudflare Secrets"
+        : "ยังไม่มี Google Alerts feed: สร้าง Alert ในบัญชี Google ของคุณก่อน";
+  $("mentionQueries").innerHTML = (state.mention_queries || [])
+    .map(
+      (q) =>
+        '<div class="connection-item"><div><b>' +
+        esc(q.platform) +
+        '</b><div class="muted">' +
+        esc(q.query) +
+        '</div></div><a class="secondary" target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=' +
+        encodeURIComponent(q.query) +
+        '">ค้นหา</a></div>',
+    )
+    .join("");
   $("sources").innerHTML = [
+    [
+      "Google Alerts RSS/Atom",
+      "google_alerts",
+      "เฉพาะผลที่ Google ส่งเข้า feed · ประเมินจากข้อความย่อ ไม่ใช่โพสต์เต็ม",
+    ],
     [
       "Google News / Bing RSS",
       "news",
@@ -322,11 +348,12 @@ $("settingsForm").onsubmit = async (e) => {
     "email_enabled",
     "line_enabled",
     "paused",
+    "google_alerts_enabled",
     "bluesky_enabled",
     "youtube_enabled",
   ])
     cfg[k] = $(k).checked;
-  for (const k of ["keywords", "holidays"])
+  for (const k of ["keywords", "holidays", "excluded_urls"])
     cfg[k] = $(k)
       .value.split("\n")
       .map((x) => x.trim())

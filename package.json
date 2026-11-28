@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "pretest": "npm run build",
-    "test": "node test/worker.test.mjs && node test/public-social.test.mjs",
+    "test": "node test/worker.test.mjs && node test/public-social.test.mjs && node test/google-alerts.test.mjs",
     "check": "node scripts/check-secrets.mjs",
     "deploy": "node scripts/deploy.mjs",
     "test:runtime": "node test/runtime.test.mjs"
