@@ -14,8 +14,15 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
     bindings: {
       RESEND_API_KEY: "test-only-runtime-secret",
       EMAIL_FROM: "sender@example.org",
+      GOOGLE_ALERTS_FEEDS: JSON.stringify([
+        "https://www.google.com/alerts/feeds/fixture/account",
+      ]),
     },
     outboundService: async (req) => {
+      if (req.url.startsWith("https://www.google.com/alerts/feeds/"))
+        return new Response(
+          '<feed><entry><title>SiPH คุณหมอบริการดี</title><link rel="alternate" href="https://www.google.com/url?url=https%3A%2F%2Fpantip.com%2Ftopic%2F123"/><content>โรงพยาบาลดี</content></entry></feed>',
+        );
       if (req.url.startsWith("https://api.bsky.app/"))
         return Response.json({
           posts: [
@@ -89,12 +96,14 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       body: "{}",
     });
     assert.equal(r.status, 200);
-    assert.equal((await r.json()).added, 2);
+    assert.equal((await r.json()).added, 3);
     r = await mf.dispatchFetch("https://monitor.test/api/state", {
       headers: { Cookie: cookie },
     });
     const state = await r.json();
-    assert.equal(state.stats.total, 2);
+    assert.equal(state.stats.total, 3);
+    assert.equal(state.google_alerts_setup.count, 1);
+    assert.doesNotMatch(JSON.stringify(state), /\/alerts\/feeds\/fixture/);
     assert.equal(state.connections.email, true);
     assert.doesNotMatch(JSON.stringify(state), /test-only-runtime-secret/);
     const worker = await mf.getWorker();
@@ -107,7 +116,7 @@ test("Workers runtime: real D1, auth, secrets and durable scheduled outbox", asy
       (await db.prepare("SELECT status FROM deliveries").first()).status,
       "sent",
     );
-    assert.equal(deliveries.length, 2);
+    assert.equal(deliveries.length, 3);
     assert.deepEqual(deliveries[0].to, ["recipient@example.org"]);
   } finally {
     await mf.dispose();

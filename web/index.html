@@ -160,6 +160,21 @@
               ><label class="check"
                 ><input type="checkbox" id="youtube_enabled" /> ตรวจวิดีโอ YouTube
                 เมื่อมี API key</label
+              ><label class="check"
+                ><input type="checkbox" id="google_alerts_enabled" /> นำเข้าผล
+                Google Alerts เมื่อมี feed</label
+              ><label for="excluded_urls"
+                >URL บัญชีทางการ/เว็บไซต์ที่ไม่ต้องการติดตาม</label
+              >
+              <p class="muted">
+                หนึ่ง URL ต่อบรรทัด ตัดออกจากรายการใหม่ตามเว็บไซต์และเส้นทางที่ระบุ
+                ไม่ลบประวัติเดิม
+              </p>
+              <textarea
+                id="excluded_urls"
+                rows="4"
+                placeholder="https://www.facebook.com/ชื่อเพจทางการ"
+              ></textarea
               ><label for="holidays">วันหยุดเพิ่มเติม</label>
               <p class="muted">หนึ่งวันต่อบรรทัด รูปแบบ YYYY-MM-DD เช่น 2026-12-10</p>
               <textarea id="holidays" rows="4"></textarea
@@ -210,6 +225,28 @@
           </div>
         </form>
         <article class="panel connection-panel">
+          <h2>Google Search / Google Alerts</h2>
+          <p class="muted">
+            ค้นโพสต์ที่คนอื่นกล่าวถึง SiPH ในหน้าที่ Google ทำดัชนีไว้ ไม่ใช่ API
+            ของแพลตฟอร์มโดยตรง
+          </p>
+          <div id="alertsSetup" class="hint"></div>
+          <div id="mentionQueries"></div>
+          <p class="muted">
+            <a
+              href="https://www.google.com/alerts"
+              target="_blank"
+              rel="noopener noreferrer"
+              >เปิด Google Alerts</a
+            >
+            ด้วยบัญชีของคุณ เลือกส่งเป็น RSS หากมี แล้วเก็บลิงก์ใน Cloudflare Secret ชื่อ
+            GOOGLE_ALERTS_FEEDS (JSON array สูงสุด 10 feeds)
+            ห้ามส่งรหัสผ่านหรือเผยแพร่ลิงก์ feed
+          </p>
+          <p class="muted">
+            ระบบตรวจตามตารางเดิม แต่ควบคุมเวลาที่ Google พบหรือส่งผลใหม่ไม่ได้
+            การแก้คำค้นที่นี่ไม่แก้ Alert ที่สร้างใน Google ให้อัตโนมัติ
+          </p>
           <h2>แหล่งโซเชียลสาธารณะ</h2>
           <p class="muted">
             Bluesky ไม่ต้องมี API key; YouTube ต้องตั้ง YOUTUBE_API_KEY ใน Cloudflare

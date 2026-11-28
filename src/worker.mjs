@@ -1,3 +1,9 @@
+import {
+  collectAlerts,
+  alertFeedConfig,
+  excludedURL,
+  mentionSearchQueries,
+} from "./google-alerts.mjs";
 import { collectPublicSocial } from "./public-social.mjs";
 import { credentials, sourceURL } from "./integrations.mjs";
 import {
@@ -291,6 +297,15 @@ async function collect(config, keys) {
   records.push(...publicResult.records);
   errors.push(...publicResult.errors);
   success += publicResult.success;
+  const alerts = await collectAlerts(config, keys.google_alerts_feeds, (url) =>
+    getURL(url),
+  );
+  records.push(...alerts.records);
+  errors.push(...alerts.errors);
+  success += alerts.success;
+  records = records.filter(
+    (record) => !excludedURL(record.url, config.excluded_urls),
+  );
   return { records, errors, success };
 }
 async function scan(env, { scheduled = false } = {}) {
@@ -338,7 +353,9 @@ async function scan(env, { scheduled = false } = {}) {
             a.published,
             started,
             sentiment,
-            reason,
+            a.discovery === "google-alerts"
+              ? reason + " · ประเมินจากข้อความย่อ Google Alerts กรุณาอ่านโพสต์ต้นฉบับ"
+              : reason,
             runID,
           ),
         );
@@ -529,12 +546,20 @@ async function state(env) {
     next: new Date(schedule(Date.now(), config.holidays).next).toISOString(),
     connections: {
       news: true,
+      google_alerts:
+        config.google_alerts_enabled &&
+        alertFeedConfig(keys.google_alerts_feeds).status === "ready",
       social: !!keys.social_feed_url,
       bluesky: config.bluesky_enabled,
       youtube: config.youtube_enabled && !!keys.youtube_api_key,
       email: !!keys.email_api_key && !!keys.email_from,
       line: !!keys.line_token,
     },
+    google_alerts_setup: {
+      status: alertFeedConfig(keys.google_alerts_feeds).status,
+      count: alertFeedConfig(keys.google_alerts_feeds).urls.length,
+    },
+    mention_queries: mentionSearchQueries(config.keywords),
     limits: { articles: 1000, export: 10000 },
     runtime: "cloudflare",
   };

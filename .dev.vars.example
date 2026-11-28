@@ -5,3 +5,5 @@ LINE_CHANNEL_ACCESS_TOKEN=
 SOCIAL_FEED_URL=
 SOCIAL_FEED_TOKEN=
 YOUTUBE_API_KEY=
+# JSON array of private Google Alerts RSS/Atom feed URLs; never commit real values.
+GOOGLE_ALERTS_FEEDS=

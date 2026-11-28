@@ -27,6 +27,7 @@ node scripts/init-db.mjs --confirm=siph-monitor-db
 | `LINE_CHANNEL_ACCESS_TOKEN` | ส่ง push ด้วย LINE Official Account / Messaging API |
 | `SOCIAL_FEED_URL` | HTTPS endpoint ของ social listening ที่องค์กรมีสิทธิ์ใช้ |
 | `SOCIAL_FEED_TOKEN` | Bearer token สำหรับ endpoint นั้น |
+| `GOOGLE_ALERTS_FEEDS` | JSON array ของ Google Alerts RSS/Atom ส่วนตัว สูงสุด 10 feeds ดู [วิธีตั้งค่า](GOOGLE_ALERTS.md) |
 | `YOUTUBE_API_KEY` | YouTube public-video search ภายในโควตาบัญชี ดู FREE_SOURCES.md |
 
 ไม่จำเป็นต้องตั้งทุกช่อง แหล่งข่าว RSS ใช้งานได้โดยไม่ต้องมี API key สถานะ Dashboard แสดงเฉพาะว่ามีการตั้งค่า ไม่ส่งค่า secret กลับ API

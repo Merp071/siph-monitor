@@ -681,3 +681,88 @@ test("YouTube metadata expires without removing other sources or authentication"
   assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM deliveries").get().n, 0);
   assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM auth").get().n, 1);
 });
+test("exclusion preferences validate URLs and preserve old configurations", () => {
+  assert.equal(
+    validateSettings(DEFAULT, { google_alerts_enabled: false })
+      .google_alerts_enabled,
+    false,
+  );
+  assert.throws(() =>
+    validateSettings(DEFAULT, { excluded_urls: ["javascript:alert(1)"] }),
+  );
+  assert.throws(() =>
+    validateSettings(DEFAULT, {
+      excluded_urls: ["https://user:pass@example.org"],
+    }),
+  );
+  assert.deepEqual(
+    validateSettings(DEFAULT, {
+      excluded_urls: ["https://facebook.com/Official"],
+    }).excluded_urls,
+    ["https://facebook.com/Official"],
+  );
+});
+test("Google Alerts imports deduplicate and persist snippet-only sentiment provenance", async (t) => {
+  const e = env();
+  const feed = "https://www.google.com/alerts/feeds/fixture/account";
+  e.GOOGLE_ALERTS_FEEDS = JSON.stringify([feed]);
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async (url) =>
+      new Response(
+        url === feed
+          ? '<feed><entry><title>SiPH คุณหมอดูแลดี</title><link href="https://pantip.com/topic/123"/></entry></feed>'
+          : "<rss><channel/></rss>",
+      ),
+  );
+  assert.equal((await scan(e)).added, 1);
+  const a = e.db.prepare("SELECT * FROM articles").get();
+  assert.equal(a.source, "Pantip · Google Alerts");
+  assert.match(a.reason, /ข้อความย่อ Google Alerts/);
+  e.db.prepare("UPDATE runs SET started='2000-01-01'").run();
+  assert.equal((await scan(e)).added, 0);
+});
+test("source setup exposes only feed count and never the private feed links", async () => {
+  const e = env();
+  e.GOOGLE_ALERTS_FEEDS = JSON.stringify([
+    "https://www.google.com/alerts/feeds/fixture/private",
+  ]);
+  const token = "b".repeat(64);
+  e.db
+    .prepare("INSERT INTO sessions VALUES(?,?)")
+    .run(await hash(token), Date.now() + 60000);
+  const r = await worker.fetch(
+    new Request("https://monitor.test/api/state", {
+      headers: { Cookie: "__Host-siph=" + token },
+    }),
+    e,
+    { waitUntil() {} },
+  );
+  const s = await r.json();
+  assert.equal(s.google_alerts_setup.count, 1);
+  assert.equal(s.connections.google_alerts, true);
+  assert.equal(s.mention_queries.length, 5);
+  assert.doesNotMatch(JSON.stringify(s), /\/alerts\/feeds\/fixture/);
+});
+test("official URL exclusions apply to newly collected sources without deleting history", async (t) => {
+  const e = env();
+  e.db.prepare("UPDATE settings SET data=?").run(
+    JSON.stringify({
+      ...DEFAULT,
+      bluesky_enabled: false,
+      youtube_enabled: false,
+      excluded_urls: ["https://official.example.org/"],
+    }),
+  );
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async () =>
+      new Response(
+        "<rss><channel><item><title>SiPH ขอบคุณ</title><link>https://official.example.org/post/1</link></item></channel></rss>",
+      ),
+  );
+  assert.equal((await scan(e)).added, 0);
+  assert.equal(e.db.prepare("SELECT COUNT(*) AS n FROM articles").get().n, 0);
+});
